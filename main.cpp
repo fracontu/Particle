@@ -27,4 +27,6 @@ int main() {
   std::cout << "Name: " << name << '\n';
   std::cout << "Mass: " << mass << '\n';
   std::cout << "Charge: " << charge << '\n';
+
+  std::cout << "ciao!\n";
 }
