@@ -3,7 +3,7 @@
 #include <iostream>
 
 ParticleType::ParticleType(const char *name, const double mass,
-                           const int charge)
+                            const int charge)
     : fName{name}, fMass{mass}, fCharge{charge} {};  // per le cose const, ci va
                                                      // il const al costruttore?
 const char *ParticleType::GetfName() const {

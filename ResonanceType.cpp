@@ -5,7 +5,7 @@
 ResonanceType::ResonanceType(const char *name, const double mass,
                              const int charge, const double width)
     : ParticleType(name, mass, charge), fWidth{width} {};
-double ResonanceType::GetfWidth() const { return fWidth; };
+double ResonanceType::GetWidth() const { return fWidth; };
 void ResonanceType::Print() const {
   ParticleType::Print();
   std::cout << "Resonance width : " << fWidth << '\n';

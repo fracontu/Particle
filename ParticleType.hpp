@@ -3,8 +3,8 @@
 
 class ParticleType {
  public:
-  ParticleType(const char *name, const double mass,
-               const int charge);  // motiva questi const
+  ParticleType( const char *name, double mass,
+               int charge);  // motiva questi const
   const char *GetfName() const;
   double GetfMass() const;
   int GetfCharge() const;

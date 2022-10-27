@@ -2,28 +2,29 @@
 
 #include <cmath>    // for M_PI
 #include <cstdlib>  //for RAND_MAX
+#include <cstring>
 #include <iostream>
 
 int Particle::fNParticleType = 0;
 
 Particle::Particle(const char* name, const double px = 0, const double py = 0,
                    const double pz = 0)
-    : impulse{px, py, pz}, fIndex{FindParticle(name)} {}
+    : impulse{px, py, pz}, fIndex{FindParticle(name)} {
+  if (fIndex < 0) {
+    std::cout << "This particle doesn't exists! ( " << name << " ).\n";
+  }
+}
 
 ParticleType* Particle::fParticleType[Particle::fMaxNumParticleType];
 
 int Particle::FindParticle(const char* NameParticle) {
   for (int i = 0; i < fNParticleType; i++) {
-    if (fParticleType[i]->GetfName() == NameParticle) return i;
+    if (std::strcmp(fParticleType[i]->GetfName(), NameParticle) == 0) return i;
   }
-
-  std::cout << "Can't find your particle.\n";
   return -1;
 };
 
 int Particle::GetfIndex() const { return fIndex; };
-
-Particle part{"name"};
 
 void Particle::AddParticleType(
     const char* name, const double mass, const int charge,
@@ -31,7 +32,10 @@ void Particle::AddParticleType(
                            // di width, perché?
   ParticleType* p;
   ResonanceType* r;
-  if (fNParticleType <= 10 &&
+
+  // Sistema il modo in cui agiscono questi if
+
+  if (fNParticleType < 10 &&
       FindParticle(name) < 0) {  // Perché non posso usare this?
     if (width == 0) {
       p = new ParticleType{name, mass, charge};
@@ -40,16 +44,21 @@ void Particle::AddParticleType(
       r = new ResonanceType{name, mass, charge, width};
       fParticleType[fNParticleType] = r;
     }
+    ++fNParticleType;
 
+  } else if (fNParticleType > 9) {
+    std::cout << "Too many particle types!\n";
+  } else if (FindParticle(name) >= 0) {
+    std::cout << "This particle already exists! ( " << name << " ).\n";
   } else
-    std::cout << "Too many particle types.";
+    std::cout << "Can't create this particle type!\n";
 };
 
 void Particle::SetParticle(const char* name) {
   if (FindParticle(name) > -1) {
     fIndex = FindParticle(name);
   } else
-    std::cout << "Can't find this particle.\n";
+    std::cout << "Can't find the particle you want to set.\n";
 }
 
 void Particle::SetParticle(const int index) {
@@ -62,7 +71,7 @@ void Particle::SetParticle(const int index) {
 
 void Particle::PrintTypes() const {
   std::cout << "Content of array:\n";
-  for (int i = 0; i < fNParticleType; i++) {
+  for (int i = 0; i <= fNParticleType; i++) {
     fParticleType[i]->Print();
   }
   std::cout << '\n';
