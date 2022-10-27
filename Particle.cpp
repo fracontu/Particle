@@ -1,6 +1,7 @@
 #include "Particle.hpp"
 
-#include <cmath>
+#include <cmath>    // for M_PI
+#include <cstdlib>  //for RAND_MAX
 #include <iostream>
 
 int Particle::fNParticleType = 0;
@@ -80,7 +81,7 @@ double Particle::GetPx() const { return impulse.px_; }
 double Particle::GetPy() const { return impulse.py_; }
 double Particle::GetPz() const { return impulse.pz_; }
 double Particle::GetMass() const { return fParticleType[fIndex]->GetfMass(); }
-double Particle::GetETot() const {
+double Particle::GetEnergy() const {
   double mass = fParticleType[fIndex]->GetfMass();
   double p = std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
                        impulse.pz_ * impulse.pz_);
@@ -90,7 +91,7 @@ double Particle::GetETot() const {
 Impulse Particle::GetImpulse() const { return impulse; }
 
 double Particle::GetInvMass(Particle& p) const {
-  double ETot = GetETot() + p.GetETot();  // E1 + E2
+  double ETot = GetEnergy() + p.GetEnergy();  // E1 + E2
   double p1 = std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
                         impulse.pz_ * impulse.pz_);
   double p2 = std::sqrt(p.GetImpulse().px_ * p.GetImpulse().px_ +
@@ -104,4 +105,82 @@ void Particle::SetP(double px, double py, double pz) {
   impulse.px_ = px;
   impulse.py_ = py;
   impulse.pz_ = pz;
+}
+
+int Particle::Decay2body(Particle& dau1, Particle& dau2) const {
+  if (GetMass() == 0.0) {
+    printf("Decayment cannot be preformed if mass is zero\n");
+    return 1;
+  }
+
+  double massMot = GetMass();
+  double massDau1 = dau1.GetMass();
+  double massDau2 = dau2.GetMass();
+
+  if (fIndex > -1) {  // add width effect
+
+    // gaussian random numbers
+
+    float x1, x2, w, y1, y2;
+
+    double invnum = 1. / RAND_MAX;
+    do {
+      x1 = 2.0 * rand() * invnum - 1.0;
+      x2 = 2.0 * rand() * invnum - 1.0;
+      w = x1 * x1 + x2 * x2;
+    } while (w >= 1.0);
+
+    w = sqrt((-2.0 * log(w)) / w);
+    y1 = x1 * w;
+    y2 = x2 * w;
+
+    massMot += fParticleType[fIndex]->GetWidth() * y1;
+  }
+
+  if (massMot < massDau1 + massDau2) {
+    printf(
+        "Decayment cannot be preformed because mass is too low in this "
+        "channel\n");
+    return 2;
+  }
+
+  double pout =
+      sqrt(
+          (massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) *
+          (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) /
+      massMot * 0.5;
+
+  double norm = 2 * M_PI / RAND_MAX;
+
+  double phi = rand() * norm;
+  double theta = rand() * norm * 0.5 - M_PI / 2.;
+  dau1.SetP(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi),
+            pout * cos(theta));
+  dau2.SetP(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi),
+            -pout * cos(theta));
+
+  double energy = sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
+                       impulse.pz_ * impulse.pz_ + massMot * massMot);
+
+  double bx = impulse.px_ / energy;
+  double by = impulse.py_ / energy;
+  double bz = impulse.pz_ / energy;
+
+  dau1.Boost(bx, by, bz);
+  dau2.Boost(bx, by, bz);
+
+  return 0;
+}
+void Particle::Boost(double bx, double by, double bz) {
+  double energy = GetEnergy();
+
+  // Boost this Lorentz vector
+  double b2 = bx * bx + by * by + bz * bz;
+  double gamma = 1.0 / sqrt(1.0 - b2);
+  double bp = bx * impulse.px_ + by * impulse.py_ + bz * impulse.pz_;
+  double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
+
+  impulse.px_ += gamma2 * bp * bx + gamma * bx * energy;
+  impulse.py_ += gamma2 * bp * by + gamma * by * energy;
+  impulse.pz_ += gamma2 * bp * bz + gamma * bz * energy;
 }

@@ -1,0 +1,36 @@
+[33mcommit fc788867afed4ace78e28057be4cfba4b36955c6[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: fracontu <francescocontu2002@gmail.com>
+Date:   Thu Oct 27 11:46:31 2022 +0200
+
+    Just generalized .gitignore
+
+[33mcommit 4c87217a6b00ba617bdf89e6b5fe0aecfc42ea61[m
+Merge: 9b59e02 cd6bdbb
+Author: fracontu <francescocontu2002@gmail.com>
+Date:   Thu Oct 27 11:45:53 2022 +0200
+
+    Merge branch 'main' of github.com:fracontu/Particle into main
+
+[33mcommit 9b59e02ac2437ae7994bc6f85de2c12723a7c7d1[m
+Author: fracontu <francescocontu2002@gmail.com>
+Date:   Thu Oct 27 11:45:27 2022 +0200
+
+    Just generalized .gitignore
+
+[33mcommit cd6bdbb7ce90a4d2b632f2cbf2f530c936108d3c[m
+Author: fracontu <102258709+fracontu@users.noreply.github.com>
+Date:   Thu Oct 27 11:41:57 2022 +0200
+
+    Create README.md
+
+[33mcommit ad5124a284473839bd03724eb588cc32eb9b18ff[m
+Author: fracontu <francescocontu2002@gmail.com>
+Date:   Thu Oct 27 11:36:38 2022 +0200
+
+    Added ciao! at the end of main
+
+[33mcommit 38d116719c90b9ca082fca4fdf9778477ead6b39[m
+Author: fracontu <francescocontu2002@gmail.com>
+Date:   Thu Oct 27 11:33:10 2022 +0200
+
+    Lab 1

@@ -31,9 +31,11 @@ class Particle {
   double GetPy() const;
   double GetPz() const;
   double GetMass() const;
-  double GetETot() const;
+  double GetEnergy() const;
   double GetInvMass(Particle& p) const;
   Impulse GetImpulse() const;
+
+  int Decay2body(Particle& dau1, Particle& dau2) const;
 
  private:
   static int fNParticleType;
@@ -46,6 +48,8 @@ class Particle {
       const char*
           NameParticle);  // altrimenti non lo posso usare, quando scrivo altri
                           // metodi, se non ho prima istanziato altre classi
+
+  void Boost(double bx, double by, double bz);
 };
 
 #endif

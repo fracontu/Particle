@@ -9,6 +9,7 @@ class ParticleType {
   double GetfMass() const;
   int GetfCharge() const;
   virtual void Print() const;
+  virtual double GetWidth() const;
 
  private:
   const char *fName;
