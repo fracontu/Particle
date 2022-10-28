@@ -3,7 +3,7 @@
 #include <iostream>
 
 ParticleType::ParticleType(const char *name, const double mass,
-                            const int charge)
+                           const int charge)
     : fName{name}, fMass{mass}, fCharge{charge} {};  // per le cose const, ci va
                                                      // il const al costruttore?
 const char *ParticleType::GetfName() const {
@@ -21,4 +21,4 @@ void ParticleType::Print() const {
   std::cout << "Charge          : " << fCharge << '\n';
 };
 
-double ParticleType::GetWidth() const {return 0.;}
+double ParticleType::GetWidth() const { return 0.; }

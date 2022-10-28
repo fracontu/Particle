@@ -15,6 +15,8 @@ Particle::Particle(const char* name, const double px = 0, const double py = 0,
   }
 }
 
+Particle::Particle() : impulse{0., 0., 0.}, fIndex{0} {}  // fIndex va bene così
+
 ParticleType* Particle::fParticleType[Particle::fMaxNumParticleType];
 
 int Particle::FindParticle(const char* NameParticle) {
