@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <iostream>
 
 #include "Particle.hpp"
@@ -6,7 +8,11 @@
 
 // Il codice di prova usato per il Lab1 sta dopo il main
 
-int main() {
+void Main() {
+  R__LOAD_LIBRARY(ParticleType_cpp.so);
+  R__LOAD_LIBRARY(ResonanceType_cpp.so);
+  R__LOAD_LIBRARY(Particle_cpp.so);
+
   Particle::AddParticleType("Pion+", 0.13957, 1);
   Particle::AddParticleType("Pion-", 0.13957, -1);
   Particle::AddParticleType("Kaon+", 0.49367, 1);
@@ -15,16 +21,116 @@ int main() {
   Particle::AddParticleType("Proton-", 0.93827, -1);
   Particle::AddParticleType("K*", 0.89166, 0, 0.05);
 
-  //gRandom->SetSeed();
-  int MaxNumEventParticles = 120;
+  gRandom->SetSeed();
+  int MaxNumEventParticles = 119;
   Particle EventParticles[MaxNumEventParticles];
 
-  for (int i = 0; i < MaxNumEventParticles; i++)
-  {
-    //gRandom->Rndm();
-  }
-  
-};
+  TH1F *Histo_Types =
+      new TH1F("Type of Particles", "Type of Particles", 7, 0, 7);
+  TH1F *Histo_Phi_Angles = new TH1F("Phi Angle", "Phi Angle", 10, 0, 2 * M_PI);
+  TH1F *Histo_Theta_Angles =
+      new TH1F("Theta Angle", "Theta Angle", 10, 0, M_PI);
+  TH1F *Histo_Impulse = new TH1F("Impulse", "Impulse", 10, 0, 10);
+  TH1F *Histo_Impulse_Transverse =
+      new TH1F("Impulse Transverse", "Impulse Transverse", 10, 0, 10);
+  TH1F *Histo_Energy = new TH1F("Energy", "Energy", 10, 0, 10);
+
+  // Aggiungere il loop per arrivare a 10^5 eventi
+
+  for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
+    double phi = gRandom->Uniform(0, 2 * M_PI);
+    Histo_Phi_Angles->Fill(phi);
+    double theta = gRandom->Uniform(0, M_PI);
+    Histo_Theta_Angles->Fill(theta);
+    double p = gRandom->Exp(1);
+    EventParticles[i].SetP(p * std::sin(theta) * std::cos(phi),
+                           p * std::sin(theta) * std::sin(phi),
+                           p * std::cos(theta));
+    Histo_Impulse->Fill(EventParticles[i].GetImpulseModule());
+    Histo_Impulse_Transverse->Fill(
+        EventParticles[i].GetTransverseImpulseModule());
+    const double ran =
+        gRandom->Rndm();  // se non faccio 2 con numeri random, e uso sempre il
+                          // primo, poi i decadimenti sono necessariamente del
+                          // secondo tipo
+    // prova a fare sta cose con uno switch
+    int NumOfDaus =
+        -1;  // trova un modo migliore di farlo //Da -1 perché lo devo aumentare
+             // ogni volta e la prima volta mi serve sia a 0
+    if (ran < 0.4) {
+      EventParticles[i].SetParticle("Pion+");
+      Histo_Types->Fill(0.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.4 && ran > 0.8) {
+      EventParticles[i].SetParticle("Pion-");
+      Histo_Types->Fill(1.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.8 && ran < 0.85) {
+      EventParticles[i].SetParticle("Kaon+");
+      Histo_Types->Fill(2.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.5 && ran < 0.90) {
+      EventParticles[i].SetParticle("Kaon-");
+      Histo_Types->Fill(3.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.90 && ran < 0.945) {
+      EventParticles[i].SetParticle("Proton+");
+      Histo_Types->Fill(4.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.945 && ran < 0.99) {
+      EventParticles[i].SetParticle("Proton-");
+      Histo_Types->Fill(5.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+    } else if (ran > 0.99) {
+      EventParticles[i].SetParticle("K*");
+      Histo_Types->Fill(6.5);
+      Histo_Energy->Fill(EventParticles[i].GetEnergy());
+
+      double ran2 = gRandom->Rndm();
+      Particle dau1{};
+      Particle dau2{};
+      int DauPosition = 99 + NumOfDaus;
+      // va bene far decadere K* dopo?
+      if (ran2 < 0.5) {
+        ++NumOfDaus;
+        EventParticles[DauPosition].SetParticle("Pion+");
+        Histo_Types->Fill(0.5);
+        Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
+        ++NumOfDaus;
+        EventParticles[DauPosition].SetParticle("Kaon-");
+        Histo_Types->Fill(3.5);
+        Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
+
+      } else if (ran2 > 0.5) {
+        ++NumOfDaus;
+        EventParticles[DauPosition].SetParticle("Pion-");
+        Histo_Types->Fill(1.5);
+        Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
+
+        ++NumOfDaus;
+        EventParticles[DauPosition].SetParticle("Kaon+");
+        Histo_Types->Fill(2.5);
+        Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
+      }
+      EventParticles[i].Decay2body(
+          EventParticles[NumOfDaus - 1],
+          EventParticles[NumOfDaus]);  // va bene il metodo dopo?
+    }  // Se non riesce (ma è impossibile) rimane settato di default al primo
+       // (Pion+)
+  };
+
+  TFile *Histo_File = new TFile("./ROOT_Files/Histo_File.root", "RECREATE");
+  // Histo_File->Write(); Come posso scriverci tutti i file con un solo comando?
+  //Histo_File->cd();
+  Histo_Types->Write();
+  Histo_File->Close();
+}
 
 int ProvaLab1() {
   ////////////////////////////

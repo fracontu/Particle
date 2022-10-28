@@ -35,12 +35,14 @@ class Particle {
   double GetEnergy() const;
   double GetInvMass(Particle& p) const;
   Impulse GetImpulse() const;
+  double GetImpulseModule() const;
+  double GetTransverseImpulseModule() const;
 
   int Decay2body(Particle& dau1, Particle& dau2) const;
 
 
 
- //private: //IMP:rimetti private
+ private: //IMP:rimetti private
   static int fNParticleType;
   static const int fMaxNumParticleType = 10;
   static ParticleType* fParticleType[fMaxNumParticleType];

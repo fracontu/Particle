@@ -195,3 +195,12 @@ void Particle::Boost(double bx, double by, double bz) {
   impulse.py_ += gamma2 * bp * by + gamma * by * energy;
   impulse.pz_ += gamma2 * bp * bz + gamma * bz * energy;
 }
+
+double Particle::GetImpulseModule() const {
+  return std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
+                   impulse.pz_ * impulse.pz_);
+}
+
+double Particle::GetTransverseImpulseModule() const {
+  return std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_);
+}
