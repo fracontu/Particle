@@ -204,3 +204,7 @@ double Particle::GetImpulseModule() const {
 double Particle::GetTransverseImpulseModule() const {
   return std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_);
 }
+
+double Particle::GetfCharge() const {
+  return fParticleType[fIndex]->GetfCharge();
+}

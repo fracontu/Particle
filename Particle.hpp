@@ -37,6 +37,7 @@ class Particle {
   Impulse GetImpulse() const;
   double GetImpulseModule() const;
   double GetTransverseImpulseModule() const;
+  double GetfCharge() const;
 
   int Decay2body(Particle& dau1, Particle& dau2) const;
 
