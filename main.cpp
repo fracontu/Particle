@@ -43,19 +43,33 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
       new TH1F("InvMass", "Invariant Mass", 100, 2000, 5000);  // ok i range?
   Histo_InvMass->Sumw2();
   TH1F *Histo_InvMass_SameCharge =
-      new TH1F("Invariant Mass Same Charge", "Invariant Mass Same Charge", 100, 1000, 2500);
+      new TH1F("Invariant Mass Same Charge", "Invariant Mass Same Charge", 100,
+               1000, 00);
   Histo_InvMass_SameCharge->Sumw2();
   TH1F *Histo_InvMass_DifferentCharge =
-      new TH1F("Invariant Mass Different Charge", "Invariant Mass Different Charge", 100, 1000, 3000);
-  Histo_InvMass_DifferentCharge->Sumw2();
+      new TH1F("Invariant Mass Different Charge",
+               "Invariant Mass Different Charge", 100, 1000, 3000);
+  TH1F *Histo_InvMassDiscordantPionKaon =
+      new TH1F("Invariant Mass Discordant Pion Kaon",
+               "Invariant Mass Discordant Pion Kaon", 100, 0, 500);
+  TH1F *Histo_InvMassConcordantPionKaon =
+      new TH1F("Invariant Mass Concordant Pion Kaon",
+               "Invariant Mass Concordant Pion Kaon", 100, 0, 500);
+
+  TH1F *Histo_InvMassDecadeParticles =
+      new TH1F("Invariant Mass Decade Particles",
+               "Invariant Mass Decade Particles", 100, 0, 3);
 
   /* Questo loop dovrebbe essere da 1E5, per ora lo faccio da meno per
    * velocizzare la compilazione*/
 
+  // loop dei 1E5 eventi
   for (int j = 0; j < 1E5; j++) {  // metti 10 fa 1E5
 
     int DauPosition = 100;
 
+    // loop che riempe gli array con le 100 particelle
+    double InvMassDecadeParticles = 0;
     for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
       double phi = gRandom->Uniform(0, 2 * M_PI);
       Histo_Phi_Angles->Fill(phi);
@@ -135,7 +149,9 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
           Histo_Types->Fill(2.5);
           Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
         }
-
+        InvMassDecadeParticles += EventParticles[DauPosition - 1].GetInvMass(
+            EventParticles[DauPosition]);
+        Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);
         EventParticles[i].Decay2body(EventParticles[DauPosition - 1],
                                      EventParticles[DauPosition]);
       }  // Non metto un caso default, vero? Perché tanto le particelle sono già
@@ -146,6 +162,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
     double InvMassTotSameCharge = 0;
     double InvMassTotDifferentCharge = 0;
 
+    // loop per le masse invarianti standard
     for (int k = 0; k < DauPosition; k++) {
       for (int m = k + 1; m < DauPosition; m++) {
         InvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
@@ -163,7 +180,55 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
     Histo_InvMass_DifferentCharge->Fill(InvMassTotDifferentCharge);
     Histo_InvMass_SameCharge->Fill(InvMassTotSameCharge);
 
-  }
+    double InvMassDiscordantPionKaon = 0;
+    double InvMassConcordantPionKaon = 0;
+
+    // loop per le masse invarianti con pioni e kaoni
+    for (int t = 0; t < DauPosition;
+         t++) {  // secondo me sto pezzo si può fare meglio
+      for (int u = t + 1; u < DauPosition; u++) {
+        if (EventParticles[t].GetfIndex() == 0 ||
+            EventParticles[t].GetfIndex() == 1)  // is a pion
+        {
+          if (EventParticles[u].GetfIndex() == 2 ||
+              EventParticles[u].GetfIndex() == 3)  // is a kaon
+          {
+            if (EventParticles[t].GetfCharge() *
+                    EventParticles[u].GetfCharge() >
+                0)  // if same sign
+            {
+              InvMassConcordantPionKaon +=
+                  EventParticles[t].GetInvMass(EventParticles[u]);
+            } else {
+              InvMassDiscordantPionKaon +=
+                  EventParticles[t].GetInvMass(EventParticles[u]);
+            }
+          }
+
+        } else if (EventParticles[u].GetfIndex() == 2 ||
+                   EventParticles[u].GetfIndex() == 3)  // is a kaon
+        {
+          if (EventParticles[t].GetfIndex() == 0 ||
+              EventParticles[t].GetfIndex() == 1)  // is a pion
+          {
+            if (EventParticles[t].GetfCharge() *
+                    EventParticles[u].GetfCharge() >
+                0)  // if same sign
+            {
+              InvMassConcordantPionKaon +=
+                  EventParticles[t].GetInvMass(EventParticles[u]);
+            } else {
+              InvMassDiscordantPionKaon +=
+                  EventParticles[t].GetInvMass(EventParticles[u]);
+            }
+          }
+        }
+      }
+    };
+
+    Histo_InvMassDiscordantPionKaon->Fill(InvMassDiscordantPionKaon);
+    Histo_InvMassConcordantPionKaon->Fill(InvMassConcordantPionKaon);
+  };
 
   gStyle->SetOptStat(112210);
 
@@ -181,8 +246,15 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   Histo_InvMass->Write();
   Histo_InvMass_DifferentCharge->Write();
   Histo_InvMass_SameCharge->Write();
+  Histo_InvMassDiscordantPionKaon->Write();
+  Histo_InvMassConcordantPionKaon->Write();
+  Histo_InvMassDecadeParticles->Write();  // Di questo fai anche fit gaussiano
 
   Histo_File->Close();
+
+  std::cout << "BENCHMARK: \n";
+  std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
+  std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
 }
 
 int ProvaLab1() {
