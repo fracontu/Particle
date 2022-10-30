@@ -12,7 +12,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
               /*Consiglio: creare uno script .sh che automatizzi il tutto.
               Oppure uno script separato per caricare le classi e uno per eseguire il main
               senza dover entrare ogni volta dentro a ROOT.*/ /*Che significa sta cosa */
-  R__LOAD_LIBRARY(ParticleType_cpp.so);
+  R__LOAD_LIBRARY(ParticleType_cpp.so);  // NON FUNZIONANO
   R__LOAD_LIBRARY(ResonanceType_cpp.so);
   R__LOAD_LIBRARY(Particle_cpp.so);
 
@@ -39,11 +39,15 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   TH1F *Histo_Impulse_Transverse =
       new TH1F("Impulse Transverse", "Impulse Transverse", 100, 0, 5);
   TH1F *Histo_Energy = new TH1F("Energy", "Energy", 100, 0, 10);
-  TH1F *Histo_InvMass = new TH1F("InvMass", "InvMass", 100, 0, 10);
-  // Questo rallenta di 6 o 7 secondiF
-  TH1F *Histo_InvMass_SameCharge = new TH1F("InvMass", "InvMass", 100, 0, 10);
+  TH1F *Histo_InvMass =
+      new TH1F("InvMass", "Invariant Mass", 100, 2000, 5000);  // ok i range?
+  Histo_InvMass->Sumw2();
+  TH1F *Histo_InvMass_SameCharge =
+      new TH1F("Invariant Mass Same Charge", "Invariant Mass Same Charge", 100, 1000, 2500);
+  Histo_InvMass_SameCharge->Sumw2();
   TH1F *Histo_InvMass_DifferentCharge =
-      new TH1F("InvMass", "InvMass", 100, 0, 10);
+      new TH1F("Invariant Mass Different Charge", "Invariant Mass Different Charge", 100, 1000, 3000);
+  Histo_InvMass_DifferentCharge->Sumw2();
 
   /* Questo loop dovrebbe essere da 1E5, per ora lo faccio da meno per
    * velocizzare la compilazione*/
@@ -51,6 +55,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   for (int j = 0; j < 1E5; j++) {  // metti 10 fa 1E5
 
     int DauPosition = 100;
+
     for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
       double phi = gRandom->Uniform(0, 2 * M_PI);
       Histo_Phi_Angles->Fill(phi);
@@ -137,41 +142,33 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
          // generate
     };
 
-    // Ho capito bene cosa intende sulla parte con le cariche?
-
-    double InvMassTot = 0;
+    double InvMassTot = 0;  // mettile nella posizione giusta dopo
     double InvMassTotSameCharge = 0;
     double InvMassTotDifferentCharge = 0;
 
     for (int k = 0; k < DauPosition; k++) {
-      double ParzInvMassTot = 0;
-      double ParzInvMassTotSameCharge = 0;
-      double ParzInvMassTotDifferentCharge = 0;
-
       for (int m = k + 1; m < DauPosition; m++) {
-        ParzInvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
-        int concordance;
+        InvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
         if (EventParticles[k].GetfCharge() * EventParticles[m].GetfCharge() >
             0) {
-          ParzInvMassTotSameCharge +=
+          InvMassTotSameCharge +=
               EventParticles[k].GetInvMass(EventParticles[m]);
         } else {
-          ParzInvMassTotDifferentCharge +=
+          InvMassTotDifferentCharge +=
               EventParticles[k].GetInvMass(EventParticles[m]);
         }
       }
-      InvMassTot += ParzInvMassTot;
-      InvMassTotSameCharge += ParzInvMassTotSameCharge;
-      InvMassTotDifferentCharge += ParzInvMassTotDifferentCharge;
     }
     Histo_InvMass->Fill(InvMassTot);
     Histo_InvMass_DifferentCharge->Fill(InvMassTotDifferentCharge);
     Histo_InvMass_SameCharge->Fill(InvMassTotSameCharge);
+
   }
 
+  gStyle->SetOptStat(112210);
+
   TFile *Histo_File = new TFile("./ROOT_Files/Histo_File.root", "RECREATE");
-  // Histo_File->Write(); Come posso scriverci tutti i file con un solo comando?
-  // Histo_File->cd();
+
   Histo_Types->Write();
   Histo_Phi_Angles->Write();
   Histo_Types->Write();
