@@ -60,14 +60,19 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
       new TH1F("Invariant Mass Decade Particles",
                "Invariant Mass Decade Particles", 100, 0, 3);
 
-  // loop dei 1E5 eventi
-  for (int j = 0; j < 1E5; j++) {  // metti 10 fa 1E5
+  TH1F *Histo_InvMassDecadeParticles2 =
+      new TH1F("Invariant Mass Decade Particles",
+               "Invariant Mass Decade Particles", 100, 0, 3);
 
+  // loop dei 1E5 eventi
+  for (int j = 0; j < 100; j++) {  // metti 10 fa 1E5
     int DauPosition =
         99;  // per il loop, devo poterlo aumentare di 1 la prima volta
 
     // loop che riempe gli array con le 100 particelle
     // double InvMassDecadeParticles = 0;
+
+    int decades = 0;  // debug
 
     for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
       double phi = gRandom->Uniform(0, 2 * M_PI);
@@ -115,6 +120,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         Histo_Energy->Fill(EventParticles[i].GetEnergy());
 
       } else if (ran > 0.99) {
+        decades = 1;  // debug
         EventParticles[i].SetParticle("K*");
 
         // Quella che dopo decade la metto negli istogrammi?
@@ -148,57 +154,17 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
           Histo_Types->Fill(2.5);
           Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
         }
-
-        ///////////////
-        // BIG DEBUG // (Not all)
-        ///////////////
-
-        /*std::cout << "DauPosition after decade : " << DauPosition
-                  << '\n';                                        // decade
-        std::cout << "0: Pion+, 1: Pion-, 2: Kaon+, 3: Kaon-\n";  // decade
-        std::cout << "New Particles : 1) "
-                  << EventParticles[DauPosition - 1].GetfIndex() << " , 2) "
-                  << EventParticles[DauPosition].GetfIndex() << '\n';  // decade
-                  */
-
         EventParticles[i].Decay2body(EventParticles[DauPosition - 1],
                                      EventParticles[DauPosition]);  // NOT debug
-
-        /*std::cout << "Impulse Modules : 1) "
-                  << EventParticles[DauPosition - 1].GetImpulseModule()
-                  << " , 2) " << EventParticles[DauPosition].GetImpulseModule()
-                  << '\n';  // decade
-
-        std::cout << "Energy Modules : 1) "
-                  << EventParticles[DauPosition - 1].GetEnergy() << " , 2) "
-                  << EventParticles[DauPosition].GetEnergy() << '\n';  // decade
-                  */
-/*
-        double PTot = EventParticles[DauPosition - 1].GetImpulseModule() +
-                      EventParticles[DauPosition].GetImpulseModule();
-        double ETot = EventParticles[DauPosition - 1].GetEnergy() +
-                      EventParticles[DauPosition].GetEnergy();
-*/
-
-        // double Expected_InvMass = std::sqrt(-PTot * PTot + ETot * ETot);
-        /*std::cout << "Expected InvMass :" << Expected_InvMass
-                  << '\n';  // decade
-                  */
-
-        /*InvMassDecadeParticles += EventParticles[DauPosition].GetInvMass(
-            EventParticles[DauPosition - 1]);*/
-
         double InvMassDecadeParticles = EventParticles[DauPosition].GetInvMass(
             EventParticles[DauPosition - 1]);
         Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);
-        /*
-        // debug
-        std::cout << "Real InvMass :" << InvMassDecadeParticles
-                  << '\n';  // decade
-                  */
-      }  // Non metto un caso default, vero? Perché tanto le particelle sono già
-         // generate
+      }
     };
+
+    if (decades == 1) {
+      // std::cout << "Decades in loop : " << j << '\n';  // debug
+    }
 
     // Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);  // debug
 
@@ -272,6 +238,17 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
 
     Histo_InvMassDiscordantPionKaon->Fill(InvMassDiscordantPionKaon);
     Histo_InvMassConcordantPionKaon->Fill(InvMassConcordantPionKaon);
+
+    for (int y = 101; y < DauPosition; y += 2) {
+      double InvMassDecadeParticles2 = EventParticles[DauPosition].GetInvMass(
+          EventParticles[DauPosition + 1]);
+      /*
+            std::cout << "InvMassDecadeParticles of positions " << y - 1 << "
+         and "
+                      << y << " is " << InvMassDecadeParticles << '\n';
+      */
+      Histo_InvMassDecadeParticles2->Fill(InvMassDecadeParticles2);
+    }
   };
 
   gStyle->SetOptStat(112210);
@@ -294,9 +271,15 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   Histo_InvMassConcordantPionKaon->Write();
   Histo_InvMassDecadeParticles->Write();  // Di questo fai anche fit gaussiano
 
+  Histo_InvMassDecadeParticles2->Write();  //debug
+
   Histo_File->Close();
 
-  std::cout << "BENCHMARK: \n";
+  std::cout << "BENCHMARK INSIDE LOOP (Mean and RMS should be 0.89166): \n";
+  std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
+  std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
+
+  std::cout << "BENCHMARK OUTSIDE LOOP (Mean and RMS should be 0.89166): \n";
   std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
   std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
 }
