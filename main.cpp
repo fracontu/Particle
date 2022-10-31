@@ -60,19 +60,11 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
       new TH1F("Invariant Mass Decade Particles",
                "Invariant Mass Decade Particles", 100, 0, 3);
 
-  TH1F *Histo_InvMassDecadeParticles2 =
-      new TH1F("Invariant Mass Decade Particles",
-               "Invariant Mass Decade Particles", 100, 0, 3);
-
+  int NumOfDecades = 0;
   // loop dei 1E5 eventi
   for (int j = 0; j < 100; j++) {  // metti 10 fa 1E5
     int DauPosition =
         99;  // per il loop, devo poterlo aumentare di 1 la prima volta
-
-    // loop che riempe gli array con le 100 particelle
-    // double InvMassDecadeParticles = 0;
-
-    int decades = 0;  // debug
 
     for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
       double phi = gRandom->Uniform(0, 2 * M_PI);
@@ -120,7 +112,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         Histo_Energy->Fill(EventParticles[i].GetEnergy());
 
       } else if (ran > 0.99) {
-        decades = 1;  // debug
+        NumOfDecades += 2;
         EventParticles[i].SetParticle("K*");
 
         // Quella che dopo decade la metto negli istogrammi?
@@ -132,7 +124,11 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         if (ran2 < 0.5) {
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Pion+");
-          // Per ora fillo con K*, va bene?
+          /*
+          Impulse Mother_impulse = EventParticles[i].GetImpulse();
+          EventParticles[DauPosition].SetP(
+              Mother_impulse.px_, Mother_impulse.py_, Mother_impulse.pz_);
+          */
           // Histo_Types->Fill(0.5);
           /*Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy()); */  // forse conviene accedere con
                                                                              // l'array dei tipi?
@@ -155,18 +151,13 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
           Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
         }
         EventParticles[i].Decay2body(EventParticles[DauPosition - 1],
-                                     EventParticles[DauPosition]);  // NOT debug
-        double InvMassDecadeParticles = EventParticles[DauPosition].GetInvMass(
-            EventParticles[DauPosition - 1]);
+                                     EventParticles[DauPosition]);
+        double InvMassDecadeParticles =
+            EventParticles[DauPosition - 1].GetInvMass(
+                EventParticles[DauPosition]);
         Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);
       }
     };
-
-    if (decades == 1) {
-      // std::cout << "Decades in loop : " << j << '\n';  // debug
-    }
-
-    // Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);  // debug
 
     double InvMassTot = 0;  // mettile nella posizione giusta dopo
     double InvMassTotSameCharge = 0;
@@ -238,17 +229,6 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
 
     Histo_InvMassDiscordantPionKaon->Fill(InvMassDiscordantPionKaon);
     Histo_InvMassConcordantPionKaon->Fill(InvMassConcordantPionKaon);
-
-    for (int y = 101; y < DauPosition; y += 2) {
-      double InvMassDecadeParticles2 = EventParticles[DauPosition].GetInvMass(
-          EventParticles[DauPosition + 1]);
-      /*
-            std::cout << "InvMassDecadeParticles of positions " << y - 1 << "
-         and "
-                      << y << " is " << InvMassDecadeParticles << '\n';
-      */
-      Histo_InvMassDecadeParticles2->Fill(InvMassDecadeParticles2);
-    }
   };
 
   gStyle->SetOptStat(112210);
@@ -271,15 +251,11 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   Histo_InvMassConcordantPionKaon->Write();
   Histo_InvMassDecadeParticles->Write();  // Di questo fai anche fit gaussiano
 
-  Histo_InvMassDecadeParticles2->Write();  //debug
-
   Histo_File->Close();
 
   std::cout << "BENCHMARK INSIDE LOOP (Mean and RMS should be 0.89166): \n";
   std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
   std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
 
-  std::cout << "BENCHMARK OUTSIDE LOOP (Mean and RMS should be 0.89166): \n";
-  std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
-  std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
+  std::cout << "NUMBER OF DECADES :" << NumOfDecades << '\n';
 }
