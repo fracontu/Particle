@@ -103,12 +103,7 @@ Impulse Particle::GetImpulse() const { return impulse; }
 
 double Particle::GetInvMass(Particle& p) const {
   double ETot = GetEnergy() + p.GetEnergy();  // E1 + E2
-  double p1 = std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
-                        impulse.pz_ * impulse.pz_);
-  double p2 = std::sqrt(p.GetImpulse().px_ * p.GetImpulse().px_ +
-                        p.GetImpulse().py_ * p.GetImpulse().py_ +
-                        p.GetImpulse().pz_ * p.GetImpulse().pz_);
-  double PTot = p1 + p2;
+  double PTot = GetImpulseModule() + p.GetImpulseModule();
   return std::sqrt(ETot * ETot - PTot * PTot);
 }
 

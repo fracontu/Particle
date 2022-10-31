@@ -60,16 +60,15 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
       new TH1F("Invariant Mass Decade Particles",
                "Invariant Mass Decade Particles", 100, 0, 3);
 
-  /* Questo loop dovrebbe essere da 1E5, per ora lo faccio da meno per
-   * velocizzare la compilazione*/
-
   // loop dei 1E5 eventi
   for (int j = 0; j < 1E5; j++) {  // metti 10 fa 1E5
 
-    int DauPosition = 100;
+    int DauPosition =
+        99;  // per il loop, devo poterlo aumentare di 1 la prima volta
 
     // loop che riempe gli array con le 100 particelle
-    double InvMassDecadeParticles = 0;
+    // double InvMassDecadeParticles = 0;
+
     for (int i = 0; i < 100; i++) {  // tutta sta roba è da riscrivere meglio
       double phi = gRandom->Uniform(0, 2 * M_PI);
       Histo_Phi_Angles->Fill(phi);
@@ -119,18 +118,18 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         EventParticles[i].SetParticle("K*");
 
         // Quella che dopo decade la metto negli istogrammi?
-        // Histo_Types->Fill(6.5);
-        // Histo_Energy->Fill(EventParticles[i].GetEnergy());
+        Histo_Types->Fill(6.5);
+        Histo_Energy->Fill(EventParticles[i].GetEnergy());
 
         double ran2 = gRandom->Rndm();
 
         if (ran2 < 0.5) {
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Pion+");
-          Histo_Types->Fill(0.5);
-          Histo_Energy->Fill(EventParticles[DauPosition]
-                                 .GetEnergy());  // forse conviene accedere con
-                                                 // l'array dei tipi?
+          // Per ora fillo con K*, va bene?
+          // Histo_Types->Fill(0.5);
+          /*Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy()); */  // forse conviene accedere con
+                                                                             // l'array dei tipi?
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Kaon-");
           Histo_Types->Fill(3.5);
@@ -149,14 +148,59 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
           Histo_Types->Fill(2.5);
           Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
         }
-        InvMassDecadeParticles += EventParticles[DauPosition - 1].GetInvMass(
-            EventParticles[DauPosition]);
-        Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);
+
+        ///////////////
+        // BIG DEBUG // (Not all)
+        ///////////////
+
+        /*std::cout << "DauPosition after decade : " << DauPosition
+                  << '\n';                                        // decade
+        std::cout << "0: Pion+, 1: Pion-, 2: Kaon+, 3: Kaon-\n";  // decade
+        std::cout << "New Particles : 1) "
+                  << EventParticles[DauPosition - 1].GetfIndex() << " , 2) "
+                  << EventParticles[DauPosition].GetfIndex() << '\n';  // decade
+                  */
+
         EventParticles[i].Decay2body(EventParticles[DauPosition - 1],
-                                     EventParticles[DauPosition]);
+                                     EventParticles[DauPosition]);  // NOT debug
+
+        /*std::cout << "Impulse Modules : 1) "
+                  << EventParticles[DauPosition - 1].GetImpulseModule()
+                  << " , 2) " << EventParticles[DauPosition].GetImpulseModule()
+                  << '\n';  // decade
+
+        std::cout << "Energy Modules : 1) "
+                  << EventParticles[DauPosition - 1].GetEnergy() << " , 2) "
+                  << EventParticles[DauPosition].GetEnergy() << '\n';  // decade
+                  */
+/*
+        double PTot = EventParticles[DauPosition - 1].GetImpulseModule() +
+                      EventParticles[DauPosition].GetImpulseModule();
+        double ETot = EventParticles[DauPosition - 1].GetEnergy() +
+                      EventParticles[DauPosition].GetEnergy();
+*/
+
+        // double Expected_InvMass = std::sqrt(-PTot * PTot + ETot * ETot);
+        /*std::cout << "Expected InvMass :" << Expected_InvMass
+                  << '\n';  // decade
+                  */
+
+        /*InvMassDecadeParticles += EventParticles[DauPosition].GetInvMass(
+            EventParticles[DauPosition - 1]);*/
+
+        double InvMassDecadeParticles = EventParticles[DauPosition].GetInvMass(
+            EventParticles[DauPosition - 1]);
+        Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);
+        /*
+        // debug
+        std::cout << "Real InvMass :" << InvMassDecadeParticles
+                  << '\n';  // decade
+                  */
       }  // Non metto un caso default, vero? Perché tanto le particelle sono già
          // generate
     };
+
+    // Histo_InvMassDecadeParticles->Fill(InvMassDecadeParticles);  // debug
 
     double InvMassTot = 0;  // mettile nella posizione giusta dopo
     double InvMassTotSameCharge = 0;
@@ -256,88 +300,3 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   std::cout << "Mean : " << Histo_InvMassDecadeParticles->GetMean() << '\n';
   std::cout << "RMS : " << Histo_InvMassDecadeParticles->GetRMS() << '\n';
 }
-
-int ProvaLab1() {
-  ////////////////////////////
-  //  CODICE DI PROVA LAB 1 //
-  ////////////////////////////
-
-  /*
-  ParticleType p("Neutron", -27, 0);
-  ResonanceType r("Neutron", -27, 0, 0);
-
-  ParticleType *a[2];
-  a[0] = new ParticleType("Neutron", -27, 0);
-  a[1] = new ResonanceType("Neutron", -27, 0, 0);
-  for (ParticleType *particle : a) {
-    // particle->Print();
-  };
-
-  const ParticleType p2(
-      "Neutron", 4,
-      5);  // per vedere se funzionano i const. Cosa altro devo fare?
-  // std::cout << "- const test:\n";
-
-  const char *name = p2.GetfName();  // il const è obbligatorio
-  double mass = p2.GetfMass();
-  int charge = p2.GetfCharge();
-*/
-  /*
-  std::cout << "Name: " << name << '\n';
-  std::cout << "Mass: " << mass << '\n';
-  std::cout << "Charge: " << charge << '\n';
-  */
-
-  // const ParticleType p3(p2);
-  // const ResonanceType r2(r);
-  //  Applico a queste due istanze tutti i metodi per vedere se funzionano.
-  //  Funzionano quindi le commento che danno warning
-  /*
-  p3.GetfCharge();
-  p3.GetfMass();
-  p3.GetfName();
-  p3.GetWidth();
-  p3.Print();
-  r2.GetfCharge();
-  r2.GetfMass();
-  r2.GetfName();
-  r2.GetWidth();
-  r2.Print();
-  */
-  /*
-   Particle::AddParticleType("Neutron", -27, 0, 0);
-   Particle::AddParticleType("Electron", -31, -1.6, 0);
-   Particle::AddParticleType("Proton", -31, +1.6, 0);
-
-   Particle::AddParticleType("Mela", -31, -1.6, 0);
-   Particle::AddParticleType("Pera", -31, -1.6, 0);
-   Particle::AddParticleType("Frutta", -31, -1.6, 0);
-
-   Particle::AddParticleType("Melone", -31, -1.6, 0);
-   Particle::AddParticleType("Cocomero", -31, -1.6, 0);
-   Particle::AddParticleType("Prugna", -31, -1.6, 0);
-   Particle::AddParticleType("Pesca", -31, -1.6, 0);
-
-   Particle::AddParticleType("Quella di troppo", -31, -1.6, 0);
-   */
-  /*
-  std::cout << Particle::FindParticle("Proton") << '\n';
-  std::cout << Particle::FindParticle("Neutron") << '\n';
-  std::cout << Particle::FindParticle("Banana") << '\n';
-  */
-  // Particle neutron("Neutron", 1, 1, 1);
-  //  Particle banana("Banana", 1, 1, 1);
-  //  Particle::AddParticleType("Electron", -31, -1.6, 0);
-  /*
-  std::cout << Particle::FindParticle("Electron") << '\n';
-  std::cout << Particle::FindParticle("Cocomero") << '\n';
-  std::cout << Particle::FindParticle("Quella di troppo") << '\n';
-  */
-
-  /////////////////////////////////
-  //         CODICE LAB2         //
-  /////////////////////////////////
-
-  // Provo a fare anche la compilazione da terminale?
-  return 0;
-};
