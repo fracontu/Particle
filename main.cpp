@@ -6,6 +6,12 @@
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
 
+// roba per compilare in root (non so se serve)
+#include "TFile.h"
+#include "TH1.h"
+#include "TRandom.h"
+#include "TStyle.h"
+
 // Il codice di prova usato per il Lab1 sta dopo il main
 
 void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
@@ -39,30 +45,39 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   TH1F *Histo_Impulse_Transverse =
       new TH1F("Impulse Transverse", "Impulse Transverse", 100, 0, 5);
   TH1F *Histo_Energy = new TH1F("Energy", "Energy", 100, 0, 10);
+
   TH1F *Histo_InvMass =
       new TH1F("InvMass", "Invariant Mass", 100, 2000, 5000);  // ok i range?
   Histo_InvMass->Sumw2();
+
   TH1F *Histo_InvMass_SameCharge =
       new TH1F("Invariant Mass Same Charge", "Invariant Mass Same Charge", 100,
                1000, 00);
   Histo_InvMass_SameCharge->Sumw2();
+
   TH1F *Histo_InvMass_DifferentCharge =
       new TH1F("Invariant Mass Different Charge",
                "Invariant Mass Different Charge", 100, 1000, 3000);
+  Histo_InvMass_DifferentCharge->Sumw2();
+
   TH1F *Histo_InvMassDiscordantPionKaon =
       new TH1F("Invariant Mass Discordant Pion Kaon",
                "Invariant Mass Discordant Pion Kaon", 100, 0, 500);
+  Histo_InvMassDiscordantPionKaon->Sumw2();
+
   TH1F *Histo_InvMassConcordantPionKaon =
       new TH1F("Invariant Mass Concordant Pion Kaon",
                "Invariant Mass Concordant Pion Kaon", 100, 0, 500);
+  Histo_InvMassConcordantPionKaon->Sumw2();
 
   TH1F *Histo_InvMassDecadeParticles =
       new TH1F("Invariant Mass Decade Particles",
-               "Invariant Mass Decade Particles", 100, 0, 3);
+               "Invariant Mass Decade Particles", 100, 0.3, 1.5);
+  Histo_InvMassDecadeParticlesF->Sumw2();
 
   int NumOfDecades = 0;
   // loop dei 1E5 eventi
-  for (int j = 0; j < 100; j++) {  // metti 10 fa 1E5
+  for (int j = 0; j < 1E5; j++) {  // metti 10 fa 1E5
     int DauPosition =
         99;  // per il loop, devo poterlo aumentare di 1 la prima volta
 
@@ -124,18 +139,9 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         if (ran2 < 0.5) {
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Pion+");
-          /*
-          Impulse Mother_impulse = EventParticles[i].GetImpulse();
-          EventParticles[DauPosition].SetP(
-              Mother_impulse.px_, Mother_impulse.py_, Mother_impulse.pz_);
-          */
-          // Histo_Types->Fill(0.5);
-          /*Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy()); */  // forse conviene accedere con
-                                                                             // l'array dei tipi?
+
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Kaon-");
-          Histo_Types->Fill(3.5);
-          Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
 
         } else if (ran2 > 0.5) {
           ++DauPosition;
@@ -145,10 +151,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
           Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
 
           ++DauPosition;
-
           EventParticles[DauPosition].SetParticle("Kaon+");
-          Histo_Types->Fill(2.5);
-          Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
         }
         EventParticles[i].Decay2body(EventParticles[DauPosition - 1],
                                      EventParticles[DauPosition]);
@@ -165,15 +168,20 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
 
     // loop per le masse invarianti standard
     for (int k = 0; k < DauPosition; k++) {
-      for (int m = k + 1; m < DauPosition; m++) {
-        InvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
-        if (EventParticles[k].GetfCharge() * EventParticles[m].GetfCharge() >
-            0) {
-          InvMassTotSameCharge +=
-              EventParticles[k].GetInvMass(EventParticles[m]);
-        } else {
-          InvMassTotDifferentCharge +=
-              EventParticles[k].GetInvMass(EventParticles[m]);
+      if (EventParticles[k].GetfIndex() != 6) {
+        for (int m = k + 1; m < DauPosition; m++) {
+          if (EventParticles[m].GetfIndex() != 6) {
+            InvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
+            if (EventParticles[k].GetfCharge() *
+                    EventParticles[m].GetfCharge() >
+                0) {
+              InvMassTotSameCharge +=
+                  EventParticles[k].GetInvMass(EventParticles[m]);
+            } else {
+              InvMassTotDifferentCharge +=
+                  EventParticles[k].GetInvMass(EventParticles[m]);
+            }
+          }
         }
       }
     }
@@ -184,7 +192,9 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
     double InvMassDiscordantPionKaon = 0;
     double InvMassConcordantPionKaon = 0;
 
-    // loop per le masse invarianti con pioni e kaoni
+    // loop per le masse invarianti con pioni e kaoni. Sono divisi sennò tutto
+    // insieme non si capisce nulla, tanto a livello di implementazione non
+    // cambia quasi nulla
     for (int t = 0; t < DauPosition;
          t++) {  // secondo me sto pezzo si può fare meglio
       for (int u = t + 1; u < DauPosition; u++) {

@@ -94,10 +94,8 @@ double Particle::GetPz() const { return impulse.pz_; }
 double Particle::GetMass() const { return fParticleType[fIndex]->GetfMass(); }
 double Particle::GetEnergy() const {
   double mass = fParticleType[fIndex]->GetfMass();
-  double p = std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_ +
-                       impulse.pz_ * impulse.pz_);
-  double ETot = std::sqrt(mass * mass + p * p);
-  return ETot;
+  double p = GetImpulseModule();
+  return std::sqrt(mass * mass + p * p);
 };
 Impulse Particle::GetImpulse() const { return impulse; }
 
