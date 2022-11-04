@@ -6,6 +6,13 @@
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
 
+// DOMANDE PIù IMPORTANTI:
+/*
+1) Ma InvMass va fatta la somma in ogni evento oppure ogni invmass entra
+nell'isotgramma?
+3) Servono gli include di root?
+*/
+
 // roba per compilare in root (non so se serve)
 #include "TFile.h"
 #include "TH1.h"
@@ -73,7 +80,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
   TH1F *Histo_InvMassDecadeParticles =
       new TH1F("Invariant Mass Decade Particles",
                "Invariant Mass Decade Particles", 100, 0.3, 1.5);
-  Histo_InvMassDecadeParticlesF->Sumw2();
+  Histo_InvMassDecadeParticles->Sumw2();
 
   int NumOfDecades = 0;
   // loop dei 1E5 eventi
@@ -139,17 +146,12 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
         if (ran2 < 0.5) {
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Pion+");
-
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Kaon-");
 
         } else if (ran2 > 0.5) {
           ++DauPosition;
-
           EventParticles[DauPosition].SetParticle("Pion-");
-          Histo_Types->Fill(1.5);
-          Histo_Energy->Fill(EventParticles[DauPosition].GetEnergy());
-
           ++DauPosition;
           EventParticles[DauPosition].SetParticle("Kaon+");
         }
@@ -169,7 +171,7 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
     // loop per le masse invarianti standard
     for (int k = 0; k < DauPosition; k++) {
       if (EventParticles[k].GetfIndex() != 6) {
-        for (int m = k + 1; m < DauPosition; m++) {
+        for (int m = k + 1; m <= DauPosition; m++) {
           if (EventParticles[m].GetfIndex() != 6) {
             InvMassTot += EventParticles[k].GetInvMass(EventParticles[m]);
             if (EventParticles[k].GetfCharge() *
@@ -245,8 +247,6 @@ void Main() { /*Da file: Compilazione ed esecuzione programma di generazione*/
 
   TFile *Histo_File = new TFile("./ROOT_Files/Histo_File.root", "RECREATE");
 
-  Histo_Types->Write();
-  Histo_Phi_Angles->Write();
   Histo_Types->Write();
   Histo_Phi_Angles->Write();
   Histo_Theta_Angles->Write();
