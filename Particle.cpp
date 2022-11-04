@@ -60,7 +60,8 @@ void Particle::SetParticle(const char* name) {
   if (FindParticle(name) > -1) {
     fIndex = FindParticle(name);
   } else
-    std::cout << "Can't find the particle you want to set.\n";
+    std::cout << "Can't find the particle you want to set. (" << name << " )"
+              << '\n';
 }
 
 void Particle::SetParticle(const int index) {
@@ -101,8 +102,11 @@ Impulse Particle::GetImpulse() const { return impulse; }
 
 double Particle::GetInvMass(Particle& p) const {
   double ETot = GetEnergy() + p.GetEnergy();  // E1 + E2
-  double PTot = GetImpulseModule() + p.GetImpulseModule();
-  return std::sqrt(ETot * ETot - PTot * PTot);
+  double px_tot = impulse.px_ + p.GetImpulse().px_;
+  double py_tot = impulse.py_ + p.GetImpulse().py_;
+  double pz_tot = impulse.pz_ + p.GetImpulse().pz_;
+  double P2 = px_tot * px_tot + py_tot * py_tot + pz_tot * pz_tot;
+  return std::sqrt(ETot * ETot - P2);
 }
 
 void Particle::SetP(double px, double py, double pz) {
