@@ -8,10 +8,7 @@ ParticleType::ParticleType(const char *name, const double mass,
                                                      // il const al costruttore?
 const char *ParticleType::GetfName() const {
   return fName;
-};  // perché qui mi chiede il const e negli altri no? Forse perché, dato che
-    // questo è un puntatore, quando poi lo istanzio deve per forza essere const
-    // altrimenti se lo sposto modifico l'oggetto a cui punta (cosa che non
-    // accade con gli altri dove, invece, si crea una copia)
+}; 
 double ParticleType::GetfMass() const { return fMass; };
 int ParticleType::GetfCharge() const { return fCharge; };
 void ParticleType::Print() const {

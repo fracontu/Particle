@@ -15,7 +15,7 @@ Particle::Particle(const char* name, const double px = 0, const double py = 0,
   }
 }
 
-Particle::Particle() : impulse{0., 0., 0.}, fIndex{0} {}  // fIndex va bene così
+Particle::Particle() : impulse{0., 0., 0.}, fIndex{0} {} 
 
 ParticleType* Particle::fParticleType[Particle::fMaxNumParticleType];
 
@@ -34,8 +34,6 @@ void Particle::AddParticleType(
                            // di width, perché?
   ParticleType* p;
   ResonanceType* r;
-
-  // Sistema il modo in cui agiscono questi if
 
   if (fNParticleType < 10 &&
       FindParticle(name) < 0) {  // Perché non posso usare this?
@@ -101,7 +99,7 @@ double Particle::GetEnergy() const {
 Impulse Particle::GetImpulse() const { return impulse; }
 
 double Particle::GetInvMass(Particle& p) const {
-  double ETot = GetEnergy() + p.GetEnergy();  // E1 + E2
+  double ETot = GetEnergy() + p.GetEnergy();
   double px_tot = impulse.px_ + p.GetImpulse().px_;
   double py_tot = impulse.py_ + p.GetImpulse().py_;
   double pz_tot = impulse.pz_ + p.GetImpulse().pz_;

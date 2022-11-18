@@ -46,6 +46,8 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "canvas_invmass.C": "cpp",
+        "canvas_stats.C": "cpp"
     }
 }
